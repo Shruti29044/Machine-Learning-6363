@@ -1,0 +1,494 @@
+package com.ML_project_1;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+
+public class ML {
+
+	public static Double calculateEucledean(Point p1, Point p2, boolean isAge) {
+		if (isAge) {
+			return (Math.sqrt(Math.pow((p1.age - p2.age), 2) + Math.pow((p1.height - p2.height), 2)
+					+ Math.pow((p1.weight - p2.weight), 2)));
+		} else {
+			return (Math.sqrt(Math.pow((p1.height - p2.height), 2) + Math.pow((p1.weight - p2.weight), 2)));
+		}
+	}
+
+	public static Double calculateManhatten(Point p1, Point p2) {
+		return (Math.abs(p1.age - p2.age) + Math.abs(p1.height - p2.height) + Math.abs(p1.weight - p2.weight));
+	}
+
+	public static Double calculateMinkowski(Point p1, Point p2) {
+		return (Math.pow((Math.pow((p1.age - p2.age), 3) + Math.pow((p1.height - p2.height), 3)
+				+ Math.pow((p1.weight - p2.weight), 3)), 0.33));
+	}
+
+	public static String makePrediction(boolean isOutEvaluation, List<Distance> d, int k) {
+		int manCount = 0;
+		int womenCount = 0;
+
+		for (int i = 0; i < k; i++) {
+			if (!isOutEvaluation) {
+				System.out.println(i + 1 + " neighbour with distance " + d.get(i).distance + " " + d.get(i).point.height
+						+ " " + d.get(i).point.weight + " " + d.get(i).point.age + " " + d.get(i).point.gender);
+			}
+			if (d.get(i).point.gender.equalsIgnoreCase("M")) {
+				manCount++;
+			} else {
+				womenCount++;
+			}
+		}
+		if (manCount > womenCount) {
+			return "Prediction is M";
+		} else {
+			return "Prediction is W";
+		}
+	}
+
+	public static void performWithoutEvaluation() {
+		List<Point> pointData = new ArrayList<Point>();
+		try {
+			File myObj = new File("src/com/ML_project_1/ml.txt");
+			Scanner myReader = new Scanner(myObj);
+			while (myReader.hasNextLine()) {
+				String data = myReader.nextLine();
+				data = data.replaceAll("[\\s\\-()]", "");
+				List<String> list = Arrays.asList(data.split(","));
+				pointData.add(new Point(list.get(3).trim(), Double.parseDouble(list.get(0).trim()), Double.parseDouble(list.get(1).trim()),
+						Integer.parseInt(list.get(2).trim())));
+				// System.out.println(data);
+			}
+			myReader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
+
+		List<Distance> manhatten = new ArrayList<Distance>();
+		List<Distance> eucledean = new ArrayList<Distance>();
+		List<Distance> minkowski = new ArrayList<Distance>();
+		try {
+			File myObj = new File("src/com/ML_project_1/testData_1a-1b.txt");
+			Scanner myReader = new Scanner(myObj);
+			while (myReader.hasNextLine()) {
+				String data = myReader.nextLine();
+				data = data.replaceAll("[\\s\\-()]", "");
+				List<String> list = Arrays.asList(data.split(","));
+				Point p = new Point("", Double.parseDouble(list.get(0)), Double.parseDouble(list.get(1)),
+						Integer.parseInt(list.get(2)));
+				for (Point train : pointData) {
+					eucledean.add(new Distance(train, calculateEucledean(p, train, false)));
+					manhatten.add(new Distance(train, calculateManhatten(p, train)));
+					minkowski.add(new Distance(train, calculateMinkowski(p, train)));
+				}
+				eucledean.sort((o1, o2) -> o1.distance.compareTo(o2.distance));
+				manhatten.sort((o1, o2) -> o1.distance.compareTo(o2.distance));
+				minkowski.sort((o1, o2) -> o1.distance.compareTo(o2.distance));
+				System.out.println("For Point " +p.height +"," + p.weight+"," + p.age);
+				System.out.println("eucledean with k=1 : " + makePrediction(false, eucledean, 1));
+				System.out.println("manhatten with k=1 : " + makePrediction(false, manhatten, 1));
+				System.out.println("minkowski with k=1 : " + makePrediction(false, minkowski, 1));
+				System.out.println("------------------------------------------------");
+				System.out.println("eucledean with k=3 : " + makePrediction(false, eucledean, 3));
+				System.out.println("manhatten with k=3 : " + makePrediction(false, manhatten, 3));
+				System.out.println("minkowski with k=3 : " + makePrediction(false, minkowski, 3));
+				System.out.println("------------------------------------------------");
+				System.out.println("eucledean with k=7 : " + makePrediction(false, eucledean, 7));
+				System.out.println("manhatten with k=7 : " + makePrediction(false, manhatten, 7));
+				System.out.println("minkowski with k=7 : " + makePrediction(false, minkowski, 7));
+				System.out.println("------------------------------------------------");
+				// System.out.println("Enter value for k: ");
+				// Scanner obj = new Scanner(System.in);
+//		        Integer k = obj.nextInt();
+//		        if (k.equals(null)) {
+//		        	k = (int) 1.65;
+//		        	System.out.println(".." + k);
+//		        }
+				// System.out.println(k);
+				// System.out.println(data);
+			}
+			myReader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
+	}
+
+	public static void performWithEvaluation(boolean isAge) {
+		List<Point> pointData = new ArrayList<Point>();
+		try {
+			File myObj = new File("src/com/ML_project_1/1c-1d.txt");
+			Scanner myReader = new Scanner(myObj);
+			while (myReader.hasNextLine()) {
+				String data = myReader.nextLine();
+				data = data.replaceAll("[\\s\\-()]", "");
+				List<String> list = Arrays.asList(data.split(","));
+				pointData.add(new Point(list.get(3).trim(), Double.parseDouble(list.get(0).trim()), Double.parseDouble(list.get(1).trim()),
+						Integer.parseInt(list.get(2).trim())));
+				// System.out.println(data);
+			}
+			myReader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
+
+		int correctPrediction_k1 = 0;
+		int correctPrediction_k3 = 0;
+		int correctPrediction_k5 = 0;
+		int correctPrediction_k7 = 0;
+		int correctPrediction_k9 = 0;
+		int correctPrediction_k11 = 0;
+
+		int inCorrectPrediction_k1 = 0;
+		int inCorrectPrediction_k3 = 0;
+		int inCorrectPrediction_k5 = 0;
+		int inCorrectPrediction_k7 = 0;
+		int inCorrectPrediction_k9 = 0;
+		int inCorrectPrediction_k11 = 0;
+
+		for (int i = 0; i < pointData.size(); i++) {
+			List<Distance> eucledean = new ArrayList<Distance>();
+			Point p = pointData.get(i);
+			for (int j = 0; j < pointData.size(); j++) {
+				if (i == j) {
+					continue;
+				}
+				Point train = pointData.get(j);
+				eucledean.add(new Distance(train, calculateEucledean(p, train, isAge)));
+			}
+			eucledean.sort((o1, o2) -> o1.distance.compareTo(o2.distance));
+
+			for (int k = 1; k < 12; k += 2) {
+				String s = makePrediction(true, eucledean, k);
+				//System.out.println("eucledean with k=" + k + " : " + s);
+				switch (k) {
+				case 1:
+					if ((s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("M"))
+							|| (!s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("W"))) {
+						correctPrediction_k1++;
+					} else {
+						inCorrectPrediction_k1++;
+					}
+					break;
+				case 3:
+					if ((s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("M"))
+							|| (!s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("W"))) {
+						correctPrediction_k3++;
+					} else {
+						inCorrectPrediction_k3++;
+					}
+					break;
+				case 5:
+					if ((s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("M"))
+							|| (!s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("W"))) {
+						correctPrediction_k5++;
+					} else {
+						inCorrectPrediction_k5++;
+					}
+					break;
+				case 7:
+					if ((s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("M"))
+							|| (!s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("W"))) {
+						correctPrediction_k7++;
+					} else {
+						inCorrectPrediction_k7++;
+					}
+					break;
+				case 11:
+					if ((s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("M"))
+							|| (!s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("W"))) {
+						correctPrediction_k11++;
+					} else {
+						inCorrectPrediction_k11++;
+					}
+					break;
+				case 9:
+					if ((s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("M"))
+							|| (!s.equalsIgnoreCase("Prediction is M") && p.gender.equalsIgnoreCase("W"))) {
+						correctPrediction_k9++;
+					} else {
+						inCorrectPrediction_k9++;
+					}
+					break;
+				}
+			}
+		}
+		System.out.println("KNN Accuracy of k1 with Age=" + isAge + " : "
+				+ correctPrediction_k1 * 100 / (correctPrediction_k1 + inCorrectPrediction_k1));
+		System.out.println("KNN Accuracy of k3 with Age=" + isAge + " : "
+				+ correctPrediction_k3 * 100 / (correctPrediction_k3 + inCorrectPrediction_k3));
+		System.out.println("KNN Accuracy of k5 with Age=" + isAge + " : "
+				+ correctPrediction_k5 * 100 / (correctPrediction_k5 + inCorrectPrediction_k5));
+		System.out.println("KNN Accuracy of k7 with Age=" + isAge + " : "
+				+ correctPrediction_k7 * 100 / (correctPrediction_k7 + inCorrectPrediction_k7));
+		System.out.println("KNN Accuracy of k9 with Age=" + isAge + " : "
+				+ correctPrediction_k9 * 100 / (correctPrediction_k9 + inCorrectPrediction_k9));
+		System.out.println("KNN Accuracy of k11 with Age=" + isAge + " : "
+				+ correctPrediction_k11 * 100 / (correctPrediction_k11 + inCorrectPrediction_k11));
+	}
+	
+	public static void performNaiveBayes() {
+		List<Point> pointData = new ArrayList<Point>();
+		try {
+			File myObj = new File("src/com/ML_project_1/ml.txt");
+			Scanner myReader = new Scanner(myObj);
+			while (myReader.hasNextLine()) {
+				String data = myReader.nextLine();
+				data = data.replaceAll("[\\s\\-()]", "");
+				List<String> list = Arrays.asList(data.split(","));
+				pointData.add(new Point(list.get(3).trim(), Double.parseDouble(list.get(0).trim()), Double.parseDouble(list.get(1).trim()),
+						Integer.parseInt(list.get(2).trim())));
+				// System.out.println(data);
+			}
+			myReader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
+		
+		double menHeightSum = 0;
+        double womenHeightSum = 0;
+        double menWeightSum = 0;
+        double womenWeightSum = 0;
+        double menAgeSum = 0;
+        double womenAgeSum = 0;
+        int menCount = 0;
+        int womenCount = 0;
+        for (Point trainPoint : pointData) {
+            if(trainPoint.gender.equalsIgnoreCase("M")){
+                menCount++;
+                menHeightSum += trainPoint.height;
+                menWeightSum += trainPoint.weight;
+                menAgeSum+= trainPoint.age;
+            } else {
+                womenCount++;
+                womenHeightSum += trainPoint.height;
+                womenWeightSum += trainPoint.weight;
+                womenAgeSum+= trainPoint.age;
+            }
+        }
+        double menHeightMean = menHeightSum / menCount;
+        double womenHeightMean = womenHeightSum / womenCount;
+        double menWeightMean = menWeightSum / menCount;
+        double womenWeightMean = womenWeightSum / womenCount;
+        double menAgeMean = menAgeSum / menCount;
+        double womenAgeMean = womenAgeSum / womenCount;
+        double menHeightStandard = 0;
+        double womenHeightStandard=0;
+        double menWeightStandard = 0;
+        double womenWeightStandard=0;
+        double menAgeStandard = 0;
+        double womenAgeStandard=0;
+       
+        for (Point trainPoint : pointData) {
+            if(trainPoint.gender.equalsIgnoreCase("M")){
+            	menHeightStandard+= Math.sqrt(Math.pow(trainPoint.height - menHeightMean, 2)/(menCount - 1));
+                menWeightStandard+= Math.sqrt(Math.pow(trainPoint.weight - menWeightMean, 2)/(menCount - 1));
+                menAgeStandard+= Math.sqrt(Math.pow(trainPoint.age - menAgeMean, 2)/(menCount - 1));
+            } else {
+            	womenHeightStandard+= Math.sqrt(Math.pow(trainPoint.height - womenHeightMean, 2)/(womenCount - 1));
+                womenWeightStandard+= Math.sqrt(Math.pow(trainPoint.weight - womenWeightMean, 2)/(womenCount - 1));
+                womenAgeStandard+= Math.sqrt(Math.pow(trainPoint.age - womenAgeMean, 2)/(womenCount - 1));
+            }
+        }
+		try {
+			File myObj = new File("src/com/ML_project_1/testData_1a-1b.txt");
+			Scanner myReader = new Scanner(myObj);
+			while (myReader.hasNextLine()) {
+				String data = myReader.nextLine();
+				data = data.replaceAll("[\\s\\-()]", "");
+				List<String> list = Arrays.asList(data.split(","));
+				Point p = new Point("", Double.parseDouble(list.get(0)), Double.parseDouble(list.get(1)),
+						Integer.parseInt(list.get(2)));
+				double probabilityHeightGivenMen = (Math.pow(Math.E,-(Math.pow(p.height - menHeightMean, 2))/2*Math.pow(menHeightStandard, 2))/(Math.sqrt(2*Math.PI)*menHeightStandard));
+				double probabilityHeightGivenWomen = (Math.pow(Math.E,-(Math.pow(p.height - womenHeightMean, 2))/2*Math.pow(womenHeightStandard, 2))/(Math.sqrt(2*Math.PI)*womenHeightStandard));
+				double probabilityWeightGivenMen = (Math.pow(Math.E,-(Math.pow(p.weight - menWeightMean, 2))/2*Math.pow(menWeightStandard, 2))/(Math.sqrt(2*Math.PI)*menWeightStandard));
+				double probabilityWeightGivenWomen = (Math.pow(Math.E,-(Math.pow(p.weight - womenWeightMean, 2))/2*Math.pow(womenWeightStandard, 2))/(Math.sqrt(2*Math.PI)*womenWeightStandard));
+				double probabilityAgeGivenMen = (Math.pow(Math.E,-(Math.pow(p.age - menAgeMean, 2))/2*Math.pow(menAgeStandard, 2))/(Math.sqrt(2*Math.PI)*menAgeStandard));
+				double probabilityAgeGivenWomen = (Math.pow(Math.E,-(Math.pow(p.age - womenAgeMean, 2))/2*Math.pow(womenAgeStandard, 2))/(Math.sqrt(2*Math.PI)*menAgeStandard));
+				double proababilityMen = (menCount * 1.0)/(menCount + womenCount);
+				double proababilityWomen = (womenCount * 1.0)/(menCount + womenCount);
+				
+				double totalProbabilityMen = probabilityHeightGivenMen * probabilityWeightGivenMen * probabilityAgeGivenMen * proababilityMen;
+				double totalProbabilityWomen = probabilityHeightGivenWomen * probabilityWeightGivenWomen * probabilityAgeGivenWomen * proababilityWomen;
+				
+				double probMen = totalProbabilityMen/(totalProbabilityMen + totalProbabilityWomen);
+				double probWomen = totalProbabilityWomen/(totalProbabilityMen + totalProbabilityWomen);
+				System.out.println("For Point " +p.height +"," + p.weight+"," + p.age);
+				if(probMen > probWomen) {
+					System.out.println("Prediction is M");
+				} else {
+					System.out.println("Prediction is W");
+				}
+								// System.out.println("Enter value for k: ");
+				// Scanner obj = new Scanner(System.in);
+//		        Integer k = obj.nextInt();
+//		        if (k.equals(null)) {
+//		        	k = (int) 1.65;
+//		        	System.out.println(".." + k);
+//		        }
+				// System.out.println(k);
+				// System.out.println(data);
+			}
+			myReader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
+	}
+	
+	public static void performNaiveBayesWithOneOutEvaluation(boolean isAge) {
+		
+		
+		List<Point> pointData = new ArrayList<Point>();
+		try {
+			File myObj = new File("src/com/ML_project_1/1c-1d.txt");
+			Scanner myReader = new Scanner(myObj);
+			while (myReader.hasNextLine()) {
+				String data = myReader.nextLine();
+				data = data.replaceAll("[\\s\\-()]", "");
+				List<String> list = Arrays.asList(data.split(","));
+				pointData.add(new Point(list.get(3).trim(), Double.parseDouble(list.get(0).trim()), Double.parseDouble(list.get(1).trim()),
+						Integer.parseInt(list.get(2).trim())));
+				// System.out.println(data);
+			}
+			myReader.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
+
+		int correctPrediction_k1 = 0;
+		int inCorrectPrediction_k1 = 0;
+
+		double menHeightSum = 0;
+        double womenHeightSum = 0;
+        double menWeightSum = 0;
+        double womenWeightSum = 0;
+        double menAgeSum = 0;
+        double womenAgeSum = 0;
+        int menCount = 0;
+        int womenCount = 0;
+		for (int i = 0; i < pointData.size(); i++) {
+			for (int j = 0; j < pointData.size(); j++) {
+				if (i == j) {
+					continue;
+				}
+				Point trainPoint = pointData.get(j);
+				if(trainPoint.gender.equalsIgnoreCase("M")){
+	                menCount++;
+	                menHeightSum += trainPoint.height;
+	                menWeightSum += trainPoint.weight;
+	                menAgeSum+= trainPoint.age;
+	            } else {
+	                womenCount++;
+	                womenHeightSum += trainPoint.height;
+	                womenWeightSum += trainPoint.weight;
+	                womenAgeSum+= trainPoint.age;
+	            }
+			}
+			
+			double menHeightMean = menHeightSum / menCount;
+	        double womenHeightMean = womenHeightSum / womenCount;
+	        double menWeightMean = menWeightSum / menCount;
+	        double womenWeightMean = womenWeightSum / womenCount;
+	        double menAgeMean = menAgeSum / menCount;
+	        double womenAgeMean = womenAgeSum / womenCount;
+	        double menHeightStandard = 0;
+	        double womenHeightStandard=0;
+	        double menWeightStandard = 0;
+	        double womenWeightStandard=0;
+	        double menAgeStandard = 0;
+	        double womenAgeStandard=0;
+	        
+	        for (int j = 0; j < pointData.size(); j++) {
+	        	if(i == j) {
+	        		continue;
+	        	}
+	        	Point trainPoint = pointData.get(j);
+	            if(trainPoint.gender.equalsIgnoreCase("M")){
+	            	menHeightStandard+= Math.sqrt(Math.pow(trainPoint.height - menHeightMean, 2)/(menCount - 1));
+	                menWeightStandard+= Math.sqrt(Math.pow(trainPoint.weight - menWeightMean, 2)/(menCount - 1));
+	                menAgeStandard+= Math.sqrt(Math.pow(trainPoint.age - menAgeMean, 2)/(menCount - 1));
+	            } else {
+	            	womenHeightStandard+= Math.sqrt(Math.pow(trainPoint.height - womenHeightMean, 2)/(womenCount - 1));
+	                womenWeightStandard+= Math.sqrt(Math.pow(trainPoint.weight - womenWeightMean, 2)/(womenCount - 1));
+	                womenAgeStandard+= Math.sqrt(Math.pow(trainPoint.age - womenAgeMean, 2)/(womenCount - 1));
+	            }
+	        }	        
+	        Point p = pointData.get(i);
+	        
+	        double exN = (Math.pow(p.height - menHeightMean, 2))/(2*Math.pow(menHeightStandard, 2));
+	        double probabilityHeightGivenMen = (Math.pow(Math.E,-exN)/(Math.sqrt(2*Math.PI)*menHeightStandard));
+	        
+	        exN = (Math.pow(p.height - womenHeightMean, 2))/(2*Math.pow(womenHeightStandard, 2));
+			double probabilityHeightGivenWomen = (Math.pow(Math.E,-exN)/(Math.sqrt(2*Math.PI)*womenHeightStandard));
+			
+			exN = (Math.pow(p.weight - menWeightMean, 2))/(2*Math.pow(menWeightStandard, 2));
+			double probabilityWeightGivenMen = (Math.pow(Math.E,-exN)/(Math.sqrt(2*Math.PI)*menWeightStandard));
+			
+			exN = (Math.pow(p.weight - womenWeightMean, 2))/(2*Math.pow(womenWeightStandard, 2));
+			double probabilityWeightGivenWomen = (Math.pow(Math.E,-exN)/(Math.sqrt(2*Math.PI)*womenWeightStandard));
+			
+			exN = (Math.pow(p.age- menAgeMean, 2))/(2*Math.pow(menAgeStandard, 2));
+			double probabilityAgeGivenMen = (Math.pow(Math.E,-exN))/(Math.sqrt(2*Math.PI)*menAgeStandard);
+			
+			exN = (Math.pow(p.age- womenAgeMean, 2))/(2*Math.pow(womenAgeStandard, 2));
+			double probabilityAgeGivenWomen = (Math.pow(Math.E,-exN))/(Math.sqrt(2*Math.PI)*womenAgeStandard);
+			double proababilityMen = (menCount * 1.0)/(menCount + womenCount);
+			double proababilityWomen = (womenCount * 1.0)/(menCount + womenCount);
+			double totalProbabilityMen =0;
+			double totalProbabilityWomen = 0;
+
+			if(isAge) {
+				totalProbabilityMen = probabilityHeightGivenMen * probabilityWeightGivenMen * probabilityAgeGivenMen * proababilityMen;
+				totalProbabilityWomen = probabilityHeightGivenWomen * probabilityWeightGivenWomen * probabilityAgeGivenWomen * proababilityWomen;
+			} else {
+				totalProbabilityMen = probabilityHeightGivenMen * probabilityWeightGivenMen  * proababilityMen;
+				totalProbabilityWomen = probabilityHeightGivenWomen * probabilityWeightGivenWomen * proababilityWomen;
+			}
+			
+			
+			double probMen = totalProbabilityMen/(totalProbabilityMen + totalProbabilityWomen);
+			double probWomen = totalProbabilityWomen/(totalProbabilityMen + totalProbabilityWomen);
+			
+			if(probMen > probWomen) {
+				if(p.gender.equalsIgnoreCase("M")) {
+					correctPrediction_k1++;
+				} else {
+					inCorrectPrediction_k1++;
+				}
+				//System.out.println("Prediction is M");
+			} else {
+				if(p.gender.equalsIgnoreCase("W")) {
+					correctPrediction_k1++;
+				} else {
+					inCorrectPrediction_k1++;
+				}
+				//System.out.println("Prediction is W");
+			}
+		}
+		System.out.println("Naive Bayes Accuracy of with Age=" + isAge + " : "
+				+ correctPrediction_k1 * 100 / (correctPrediction_k1 + inCorrectPrediction_k1) + "%");
+	}
+
+	public static void main(String[] args) {
+		performWithoutEvaluation();
+		System.out.println("X------------------------X-----------------------------X");
+		performWithEvaluation(true);
+		System.out.println("X------------------------X-----------------------------X");
+		performWithEvaluation(false);
+		System.out.println("X------------------------X-----------------------------X");
+		performNaiveBayes();
+		System.out.println("X------------------------X-----------------------------X");
+		performNaiveBayesWithOneOutEvaluation(true);
+		System.out.println("X------------------------X-----------------------------X");
+		performNaiveBayesWithOneOutEvaluation(false);
+		System.out.println("X------------------------X-----------------------------X");
+	}
+}
