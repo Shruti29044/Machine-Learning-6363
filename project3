@@ -1,0 +1,167 @@
+import numpy as np
+import re as re
+import os
+
+Data=[]
+#finding the number from the test
+def find_number(text):
+    num = re.findall(r'[^(),'']+',text) #function to detect integers from text
+    return num
+#file path
+file_dir = os.path.dirname(os.path.realpath('__file__'))
+with open(os.path.join(file_dir, 'datasets/Q1_train.txt')) as f:
+    lines = f.readlines() #reading the file
+for line in lines: #reading every line
+    nums=find_number(line) # Find numbers in a line
+    if line.find('M') > 0 :
+        z=1  # Convert M into integer form M = 1
+    else:
+        z=-1 # Convert F into integer form F = -1
+    #appending the float values
+    Data.append([float(nums[0]),float(nums[1]),float(nums[2]),float(z)]) 
+arr2D=np.array(Data)  # Convert Data into array
+input_train=arr2D[:,0:3] # input train data
+output_train=arr2D[:,3:] # Output train data
+
+# Class to Build a Node
+class Build_node():
+    #  a constructor function of a class
+    def __init__(self, feature_index=None, THLD_value=None, left=None, right=None, info_gain=None, value=None):
+        self.feature_index = feature_index       # Feature index value of Node
+        self.THLD_value = THLD_value   # Threshold value value of Node
+        self.left = left
+        self.right = right
+        self.info_gain = info_gain               # Info Gain of Node
+        self.value = value                        #  value of leaf Node
+
+
+# class for Decision Tree Classifier
+class DecisionTreeClassifier():
+    #  a constructor function of a class
+    def __init__(self, min_split, Depth_value):
+        self.root = None   # initialize the root of the tree 
+        self.min_split = min_split  # stopping condition of min split
+        self.Depth_value = Depth_value  # Depth depth
+        
+    #  recursive function to build the tree
+    def build_tree(self, dataset, curr_depth=0):
+        X, Y = dataset[:,:-1], dataset[:,-1] # Convert Datasets into X and Y
+        samples_count, features_count = np.shape(X) # To get number of elements and number of features in input set
+        # split until stopping conditions are met
+        if samples_count>=self.min_split and curr_depth<=self.Depth_value:
+        #if curr_depth<=self.Depth_value:
+            get_split = self.for_best_split(dataset, features_count)  # find the best split
+            if get_split["info_gain"]>0:  #  if condtion to check information gain is positive or not
+                left_subtree = self.build_tree(get_split["left_dataset"], curr_depth+1) #For left sub tree
+                right_subtree = self.build_tree(get_split["right_dataset"], curr_depth+1) #For right sub tree
+                return Build_node(get_split["feature_index"], get_split["THLD_value"],    
+                            left_subtree, right_subtree, get_split["info_gain"])     # return decision Build_node
+        leaf_value = self.CLV(Y) # compute leaf Build_node
+        return Build_node(value=leaf_value) # return leaf Build_node
+    
+    #  a function  for calculate leaf  value of build node: CLV     
+    def CLV(self, Y):
+        Y = list(Y) # convert into list
+        return max(Y, key=Y.count) # return max value
+
+    #  a function to find the best split value
+    def for_best_split(self, dataset, features_count):
+        get_split = {}   #Empty dictionary to store the best split value
+        max_info_gain = -float("inf")
+        # for loop over all the features
+        for feature_index in range(features_count):
+            feature_values = dataset[:, feature_index]
+            possible_THLD_value = np.unique(feature_values)
+            # for loop over all the feature values present in the data
+            for THLD_value in possible_THLD_value:
+                left_dataset, right_dataset = self.split(dataset, feature_index, THLD_value) # To split dataset
+                # if condition to check if childs are not null
+                if len(left_dataset)>0 and len(right_dataset)>0:
+                    y, left_y, right_y = dataset[:, -1], left_dataset[:, -1], right_dataset[:, -1]
+                    curr_info_gain = self.I_G(y, left_y, right_y, "entropy") # compute information gain
+                    # To update the best split if needed
+                    if curr_info_gain>max_info_gain:
+                        get_split["feature_index"] = feature_index
+                        get_split["THLD_value"] = THLD_value
+                        get_split["left_dataset"] = left_dataset
+                        get_split["right_dataset"] = right_dataset
+                        get_split["info_gain"] = curr_info_gain
+                        max_info_gain = curr_info_gain
+        return get_split  # return best split value
+
+     #  a function to compute information gain : I_G
+    def I_G(self, parent, left_child, right_child,mode="entropy"):
+        left_weight = len(left_child) / len(parent) # formula to calculate weight of left side
+        right_weight = len(right_child) / len(parent) # formula to calculate weight of right side
+        gain = self.entropy(parent) - (left_weight*self.entropy(left_child) + right_weight*self.entropy(right_child)) # formula to calculate Gain
+        return gain # Return Gain value
+
+    #  a function to split the data 
+    def split(self, dataset, feature_index, THLD_value):
+        left_dataset = np.array([row for row in dataset if row[feature_index]<=THLD_value]) # convert into array
+        right_dataset = np.array([row for row in dataset if row[feature_index]>THLD_value]) # convert into array
+        return left_dataset, right_dataset # return left and right datasets array
+    
+    #  a function for calculation of a entropy value 
+    def entropy(self, y):
+        CLS = np.unique(y)
+        entropy = 0 # initial entropy is ZERO
+        for cls in CLS:
+            p_cls = len(y[y == cls]) / len(y)
+            entropy += -p_cls * np.log2(p_cls)   # formula to calculate the entropy value
+        return entropy # Return entropy value
+    
+    
+    #  a function to learn a machine
+    def fit(self, X, Y):
+        dataset = np.concatenate((X, Y), axis=1) # To concatenate X and Y array
+        self.root = self.build_tree(dataset)
+
+    #  a function for prediction of a new datset
+    def To_predict(self, inputs): 
+        preditions = [self.for_prediction(input, self.root) for input in inputs]
+        return preditions # return predicted outputs
+    
+    #  a function for predicton of a single data point
+    def for_prediction(self, input, tree):
+        if tree.value!=None: return tree.value # if condtion to check value is None or not
+        feature_val = input[tree.feature_index]
+        if feature_val<=tree.THLD_value:
+            return self.for_prediction(input, tree.left) # return left tree value
+        else:
+            return self.for_prediction(input, tree.right)     # return right tree value       
+
+
+for i in range(1,6): # for loop to run for different value of depth 1 to 5
+    classifier = DecisionTreeClassifier(min_split=i, Depth_value=i)
+    classifier.fit(input_train,output_train)
+    Data_test=[]
+    #Output data file path
+    with open(os.path.join(file_dir, 'datasets/Q1_test.txt')) as f:
+        lines = f.readlines() #reading the file
+    for line in lines: #reading every line
+        nums=find_number(line) # Find numbers in a line
+        if line.find('M') > 0 :
+            z=1  # Convert M into integer form M = 1
+        else:
+            z=-1 # Convert F into integer form F = -1
+        #appending the float values
+        Data_test.append([float(nums[0]),float(nums[1]),float(nums[2]),float(z)]) 
+    arr2D=np.array(Data_test) # Convert Data into array
+    input_test=arr2D[:,0:3] #for input test data
+    output_test=arr2D[:,3:] # for output test data
+    Output_pred_train= classifier.To_predict(input_train) #to predict output of train data
+    count_train=0 #Initial count is Zero
+    for j in range(len(Output_pred_train)):
+        if(float(output_train[j])==float(Output_pred_train[j])): #To check train output is matched with predicted output
+            count_train=count_train+1
+    Accuracy_train=count_train/len(Output_pred_train) #Accuracy of train Data
+    Output_pred_test= classifier.To_predict(input_test)  #to predict output of test data
+    count_test=0 #Initial count is Zero
+    for k in range(len(Output_pred_test)): 
+        if(float(output_test[k])==float(Output_pred_test[k])): #To check test output is matched with predicted output
+            count_test=count_test+1   
+    Accuracy_test=count_test/len(Output_pred_test) #Accuracy of test Data
+
+    print("Depth = ",i) # Print Depth value
+    print("Accuracy | Train = ",Accuracy_train," | Test = ", Accuracy_test) # Print Accuracy
