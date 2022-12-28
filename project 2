@@ -1,0 +1,1219 @@
+
+
+//
+
+import numpy as np
+import matplotlib.pyplot as plt
+import re as re
+import os 
+#initialization
+Data=[]
+X= []
+Y= []
+X1=[]
+
+#function to find the number from the text
+def find_number(text):
+    #return the num by using regular exp
+    num = re.findall(r'[^(),'']+',text)
+    return num
+
+#reading the data from the input dataset file
+file_dir = os.path.dirname(os.path.realpath('__file__'))
+#opening the file
+with open(os.path.join(file_dir, 'datasets/Q1_B_train.txt')) as f:
+    lines = f.readlines()
+#for every line in the file
+for line in lines:
+    nums=find_number(line) 
+    Data.append([float(nums[0]),float(nums[1])]) 
+
+#get the 2D array from the data
+arr2D=np.array(Data) 
+resin1=[] #res1 array
+resin2=[] #res2 array
+
+# append possitive values to resin1 and negative to resin2
+for i in range(len(arr2D[:,0])):
+    if arr2D[i,0]>0:  #arr[i,0]>0
+        #appending to the resin1
+        resin1.append([arr2D[i,0], arr2D[i,1]])
+    else:
+        resin2.append([arr2D[i,0], arr2D[i,1]])
+#saving the resin1 as array
+resin1 = np.array((resin1)) 
+#saving the resin2 as array
+resin2 = np.array((resin2)) 
+
+#sort the results and then concatenate
+resin1[:,0].sort() #sorting the resin1
+resin2[:,0].sort() #sorting the resin2
+sortedData = np.concatenate((resin2, resin1), axis = 0)
+XX=np.array(sortedData[:,0]) #convert to array
+YY=np.array(sortedData[:,1]) #convert to array
+
+i=0
+#for k in 1 to 10
+for k in range(1,11):
+    #D0-D6 depth arrays
+    D0=[]
+    D1=[]
+    D2=[]
+    D3=[]
+    D4=[]
+    D5=[]
+    D6=[]
+    X=[]
+    Y=[]
+    #for every value of the length of the array
+    for t in range(len(XX)):
+        #converting to float
+        x=float(XX[t])
+        # X input Y Output
+        X.append(x)
+        #appending the float YY to Y
+        Y.append(float(YY[t]))
+        #Formulating the D0-D6 values...
+        D0.append([1])                              # Depth function D0 to D6 
+        D1.append([1,float(np.sin(k*float(x)))**2]) #D1
+        D2.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2)]) #D2
+        D3.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2)]) #D3
+        D4.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2)]) #D4
+        D5.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2)]) #D5
+        D6.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2),(np.sin(k*6*(float(x)))**2)]) #D6
+        #print(XS)
+        i=i+1
+
+    # Converted to array
+    X=np.array(X)
+    Y=np.array(Y)
+    D0=np.array(D0) #D0 to array
+    D1=np.array(D1)#D1 to array
+    D2=np.array(D2)#D2 to array
+    D3=np.array(D3)#D3 to array
+    D4=np.array(D4)#D4 to array
+    D5=np.array(D5)#D5 to array
+    D6=np.array(D6)#D6 to array
+    #np linalg solving the dot Depth values
+    w0 = np.linalg.solve(np.dot(D0.T, D0), np.dot(D0.T, Y))
+    Yhat0 = np.dot(D0, w0)
+    #np linalg solving the dot Depth values
+    w1 = np.linalg.solve(np.dot(D1.T, D1), np.dot(D1.T, Y))
+    Yhat1 = np.dot(D1, w1)
+    #np linalg solving the dot Depth values
+    w2 = np.linalg.solve(np.dot(D2.T, D2), np.dot(D2.T, Y))
+    Yhat2 = np.dot(D2, w2)
+    #np linalg solving the dot Depth values
+    w3 = np.linalg.solve(np.dot(D3.T, D3), np.dot(D3.T, Y))
+    Yhat3 = np.dot(D3, w3)
+    #np linalg solving the dot Depth values
+    w4 = np.linalg.solve(np.dot(D4.T, D4), np.dot(D4.T, Y))
+    Yhat4 = np.dot(D4, w4)
+    #np linalg solving the dot Depth values
+    w5 = np.linalg.solve(np.dot(D5.T, D5), np.dot(D5.T, Y))
+    Yhat5 = np.dot(D5, w5)
+    #np linalg solving the dot Depth values
+    w6 = np.linalg.solve(np.dot(D6.T, D6), np.dot(D6.T, Y))
+    Yhat6 = np.dot(D6, w6)
+    ## PLoting the graph
+    plt.title("k={k}".format(k=k))
+    plt.scatter(X,Yhat0,c='red',label="d=0",s=40)
+    plt.scatter(X,Yhat1,c='green',label='d=1',s=40)
+    plt.scatter(X,Yhat2,c='brown',label="d=2",s=40)
+    plt.scatter(X,Yhat3,c='orange',label='d=3',s=40)
+    plt.scatter(X,Yhat4,c='blue',label="d=4",s=40)
+    plt.scatter(X,Yhat5,c='yellow',label='d=5',s=40)
+    plt.scatter(X,Yhat6,c='black',label="d=6",s=40)
+    plt.legend(loc='best')
+    plt.grid() #plt the grid
+    plt.show() # show the plot
+    
+//
+import numpy as np
+import matplotlib.pyplot as plt
+import re as re
+import os
+#imported all the required python libraries
+#initialization 
+Data=[]
+X= [] #X array
+Y= [] #Y array
+X1=[] #X1 array
+
+#function to find the number from the text
+def find_number(text):
+    #finding the number from the given text
+    num = re.findall(r'[^(),'']+',text)
+    return num
+
+#reading the data from the input dataset file
+#forming the file path
+file_dir = os.path.dirname(os.path.realpath('__file__'))
+#reading the file 
+with open(os.path.join(file_dir, 'datasets/Q1_B_train.txt')) as f:
+    lines = f.readlines() # writing the content to lines 
+for line in lines: #for every line
+    nums=find_number(line)  #finding the number in the line
+    Data.append([nums[0],nums[1]])  #appending the numbers to the Data
+
+#get the 2D array from the data
+arr2D=np.array(Data) 
+
+#sort the results and then concatenate
+sortedData = arr2D[arr2D[:,0].sort()]
+XX=np.array(sortedData[0,:][:,0]) #forming the array
+YY=np.array(sortedData[0,:][:,1])  #forming the array
+i=0
+#for the range 1 to 10 of the K values
+for k in range(1,11):
+    #declaring the depth arrays
+    D0=[]
+    D1=[]
+    D2=[]
+    D3=[]
+    D4=[]
+    D5=[]
+    D6=[]
+    X=[]
+    Y=[]
+    #for the length of XX array
+    for t in range(len(XX)):
+        x=float(XX[t])
+        X.append(x)             # X input Y Output
+        Y.append(float(YY[t]))
+        D0.append([1])                      # Depth function D0 to D6 
+
+        D1.append([1,float(np.sin(k*float(x)))**2]) #Depth function 1 formula
+        D2.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2)]) #Depth function 2 formula
+        D3.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2)]) #Depth function 3 formula
+        D4.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2)]) #Depth function 4 formula
+        D5.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2)]) #Depth function 5 formula
+        D6.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2),(np.sin(k*6*(float(x)))**2)]) #Depth function 6 formula
+        i=i+1
+    X=np.array(X)           #conversion to array
+    Y=np.array(Y)
+    D0=np.array(D0)
+    D1=np.array(D1)
+    D2=np.array(D2)
+    D3=np.array(D3)
+    D4=np.array(D4)
+    D5=np.array(D5)
+    D6=np.array(D6)
+    #linalg function to convert 
+    w0 = np.linalg.solve(np.dot(D0.T, D0), np.dot(D0.T, Y))
+    Yhat0 = np.dot(D0, w0)
+    w1 = np.linalg.solve(np.dot(D1.T, D1), np.dot(D1.T, Y))
+    Yhat1 = np.dot(D1, w1)
+    w2 = np.linalg.solve(np.dot(D2.T, D2), np.dot(D2.T, Y))
+    Yhat2 = np.dot(D2, w2)
+    w3 = np.linalg.solve(np.dot(D3.T, D3), np.dot(D3.T, Y))
+    Yhat3 = np.dot(D3, w3)
+    w4 = np.linalg.solve(np.dot(D4.T, D4), np.dot(D4.T, Y))
+    Yhat4 = np.dot(D4, w4)
+    w5 = np.linalg.solve(np.dot(D5.T, D5), np.dot(D5.T, Y))
+    Yhat5 = np.dot(D5, w5)
+    w6 = np.linalg.solve(np.dot(D6.T, D6), np.dot(D6.T, Y))
+    Yhat6 = np.dot(D6, w6)
+
+    #analysis of test data set
+    TestData=[]
+    #using the dataset to test
+    with open(os.path.join(file_dir, 'datasets/Q1_C_test.txt')) as f:
+      lines = f.readlines()
+      #for every line in the file
+    for line in lines:
+        num=find_number(line)
+        TestData.append([num[0],num[1]]) 
+    arr=np.array(TestData)  #convert to array
+    sortData = arr[arr[:,0].sort()]
+    OX=np.array(sortData[0,:][:,0])
+    OY=np.array(sortData[0,:][:,1])
+    #defining trhe Depth Arrays
+    Xo=[]
+    Yo=[]
+    Do0=[]
+    Do1=[]
+    Do2=[]
+    Do3=[]
+    Do4=[]
+    Do5=[]
+    Do6=[]    
+    #for the length of OX array
+    for t in range(len(OX)):
+        x=float(OX[t])
+        Xo.append(x)
+        Yo.append(float(YY[t]))
+        Do0.append([1]) # depth function formula of D0
+        Do1.append([1,float(np.sin(k*float(x)))**2]) # depth function formula of D1
+        Do2.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2)]) # depth function formula of D2
+        Do3.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2)]) # depth function formula of D3
+        Do4.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2)]) # depth function formula of D4
+        Do5.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2)]) # depth function formula of D5
+        Do6.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2),(np.sin(k*6*(float(x)))**2)]) # depth function formula of D6
+        #print(XS)
+        i=i+1
+    #converting to the array
+    Xo=np.array(Xo)
+    Yo=np.array(Yo)
+    Do0=np.array(Do0)
+    Do1=np.array(Do1)
+    Do2=np.array(Do2)
+    Do3=np.array(Do3)
+    Do4=np.array(Do4)
+    Do5=np.array(Do5)
+    Do6=np.array(Do6) 
+    print("   ")
+    print("Mean square error for k = ",k) #meansqaure error printing
+    Yhato0 = np.dot(Do0, w0)
+    sum_d0=0
+    #for the range of lenth of Y
+    for i in range(len(Yhato0)):
+        d1 = Yo[i] - Yhato0[i]
+        square_d1=d1**2
+        sum_d0=sum_d0+square_d1
+    MSE_d0=sum_d0/(len(Yhato0))
+    print("For Depth '0' MSE error = ",MSE_d0)
+
+    Yhato1 = np.dot(Do1, w1)
+    sum_d1=0
+    for i in range(len(Yhato1)):
+        d1 = Yo[i] - Yhato1[i]
+        square_d1=d1**2
+        sum_d1=sum_d1+square_d1
+    MSE_d1=sum_d1/(len(Yhato1))
+    print("For Depth '1' MSE error = ",MSE_d1) #printing the MSE for depth 1
+
+
+    Yhato2 = np.dot(Do2, w2)
+    sum_d2=0
+    for i in range(len(Yhato2)):
+        d1 = Yo[i] - Yhato2[i]
+        square_d1=d1**2
+        sum_d2=sum_d2+square_d1
+    MSE_d2=sum_d2/(len(Yhato2))
+    print("For Depth '2' MSE error = ",MSE_d2) #printing the MSE for depth 2
+
+    Yhato3 = np.dot(Do3, w3)
+    sum_d3=0
+    for i in range(len(Yhato3)):
+        d1 = Yo[i] - Yhato3[i]
+        square_d1=d1**2
+        sum_d3=sum_d3+square_d1
+    MSE_d3=sum_d3/(len(Yhato3))
+    print("For Depth '3' MSE error = ",MSE_d3) #printing the MSE for depth 3
+
+    Yhato4 = np.dot(Do4, w4)
+    sum_d4=0
+    for i in range(len(Yhato4)):
+        d1 = Yo[i] - Yhato4[i]
+        square_d1=d1**2
+        sum_d4=sum_d4+square_d1
+    MSE_d4=sum_d4/(len(Yhato4))
+    print("For Depth '4' MSE error = ",MSE_d4) #printing the MSE for depth 4
+
+    Yhato5 = np.dot(Do5, w5)
+    sum_d5=0
+    for i in range(len(Yhato5)):
+        d1 = Yo[i] - Yhato5[i]
+        square_d1=d1**2
+        sum_d5=5+square_d1
+    MSE_d5=sum_d5/(len(Yhato5))
+    print("For Depth '5' MSE error = ",MSE_d5) #printing the MSE for depth 5
+
+    Yhato6 = np.dot(Do6, w6)
+    sum_d6=0
+    for i in range(len(Yhato6)):
+        d1 = Yo[i] - Yhato6[i]
+        square_d1=d1**2
+        sum_d6=sum_d6+square_d1
+    MSE_d6=sum_d6/(len(Yhato6))
+    print("For Depth '6' MSE error = ",MSE_d6) #printing the MSE for depth 6
+//
+import numpy as np
+import matplotlib.pyplot as plt
+import re as re
+import os
+
+#initialization of the arrats
+Data=[]
+X= []
+Y= []
+X1=[]
+
+#function to find the number from the text
+def find_number(text):
+    #regex getting number fromt he text
+    num = re.findall(r'[^(),'']+',text)
+    return num
+
+#reading the data from the input dataset file
+file_dir = os.path.dirname(os.path.realpath('__file__'))
+#read the input txt file
+with open(os.path.join(file_dir, 'datasets/Q1_B_train.txt')) as f:
+    lines = f.readlines()
+for line in lines: #read by lines
+    nums=find_number(line) 
+    Data.append([float(nums[0]),float(nums[1])]) 
+
+#get the 2D array from the data
+arr2D=np.array(Data[0:20])  
+resin1=[]
+resin2=[]
+
+# append possitive values to resin1 and negative to resin2
+for i in range(len(arr2D[:,0])):
+    if arr2D[i,0]>0:  #arr[i,0]>0
+        resin1.append([arr2D[i,0], arr2D[i,1]])
+    else:
+        resin2.append([arr2D[i,0], arr2D[i,1]])
+resin1 = np.array((resin1)) 
+resin2 = np.array((resin2)) 
+
+#sort the results and then concatenate
+resin1[:,0].sort()
+resin2[:,0].sort()
+sortedData = np.concatenate((resin2, resin1), axis = 0)
+XX=np.array(sortedData[:,0])
+YY=np.array(sortedData[:,1])
+i=0
+#for the range of 1 to 10
+for k in range(1,11):
+    D0=[]
+    D1=[]
+    D2=[]
+    D3=[]
+    D4=[]
+    D5=[]
+    D6=[]
+    X=[]
+    Y=[]
+    #for the range of 20
+    for t in range(20):
+        x=float(XX[t])
+        # X input Y Output
+        X.append(x)
+        Y.append(float(YY[t]))
+
+        # Depth function D0 to D6 
+        D0.append([1]) #Depth function formula for D0
+        D1.append([1,float(np.sin(k*float(x)))**2]) #Depth function formula for D1
+        D2.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2)]) #Depth function formula for D2
+        D3.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2)]) #Depth function formula for D3
+        D4.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2)]) #Depth function formula for D4
+        D5.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2)]) #Depth function formula for D5
+        D6.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2),(np.sin(k*6*(float(x)))**2)]) #Depth function formula for D6
+        #print(XS)
+        i=i+1
+
+    #convedrted to array
+    X=np.array(X)
+    Y=np.array(Y)
+    #converting to the arrays
+    D0=np.array(D0)
+    D1=np.array(D1)
+    D2=np.array(D2)
+    D3=np.array(D3)
+    D4=np.array(D4)
+    D5=np.array(D5)
+    D6=np.array(D6)
+    #linalg function for every depth variable
+    w0 = np.linalg.solve(np.dot(D0.T, D0), np.dot(D0.T, Y))
+    Yhat0 = np.dot(D0, w0)
+    w1 = np.linalg.solve(np.dot(D1.T, D1), np.dot(D1.T, Y))
+    Yhat1 = np.dot(D1, w1)
+    w2 = np.linalg.solve(np.dot(D2.T, D2), np.dot(D2.T, Y))
+    Yhat2 = np.dot(D2, w2)
+    w3 = np.linalg.solve(np.dot(D3.T, D3), np.dot(D3.T, Y))
+    Yhat3 = np.dot(D3, w3)
+    w4 = np.linalg.solve(np.dot(D4.T, D4), np.dot(D4.T, Y))
+    Yhat4 = np.dot(D4, w4)
+    w5 = np.linalg.solve(np.dot(D5.T, D5), np.dot(D5.T, Y))
+    Yhat5 = np.dot(D5, w5)
+    w6 = np.linalg.solve(np.dot(D6.T, D6), np.dot(D6.T, Y))
+    Yhat6 = np.dot(D6, w6)
+
+    #analysis of test data set
+    TestData=[]
+    with open(os.path.join(file_dir, 'datasets/Q1_C_test.txt')) as f: 
+        lines = f.readlines()
+        #reading the file line by lune
+    for line in lines:
+        num=find_number(line)
+        
+        TestData.append([float(num[0]),float(num[1])]) 
+        #creating the array
+    arr=np.array((TestData)) 
+    res1=[]
+    res2=[]
+    for i in range(len(arr[:,0])):
+        if arr[i,0]>0:
+            res1.append([arr[i,0], arr[i,1]])
+        else:
+            res2.append([arr[i,0], arr[i,1]])
+    res1 = np.array((res1)) 
+    res2 = np.array((res2)) 
+    #sorting and concatenating
+    res1[:,0].sort()
+    res2[:,0].sort()
+
+    sortDatadd = np.concatenate((res2, res1), axis = 0)
+    OX=np.array(sortDatadd[:,0])
+    #declaring the depth arrays
+    Xo=[]
+    Yo=[]
+    Do0=[]
+    Do1=[]
+    Do2=[]
+    Do3=[]
+    Do4=[]
+    Do5=[]
+    Do6=[]    
+    #for the length of OX
+    for t in range(len(OX)):
+            x=float(OX[t])
+            Xo.append(x)
+            Yo.append(float(YY[t]))
+            Do0.append([1]) #Depth function formula for D0
+            Do1.append([1,float(np.sin(k*float(x)))**2]) #Depth function formula for D1
+            Do2.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2)]) #Depth function formula for D2
+            Do3.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2)]) #Depth function formula for D3
+            Do4.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2)]) #Depth function formula for D4
+            Do5.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2)]) #Depth function formula for D5
+            Do6.append([1,(np.sin(k*float(x)))**2,(np.sin(k*2*(float(x)))**2),(np.sin(k*3*(float(x)))**2),(np.sin(k*4*(float(x)))**2),(np.sin(k*5*(float(x)))**2),(np.sin(k*6*(float(x)))**2)]) #Depth function formula for D6
+            #print(XS)
+            i=i+1
+    #converting to the arrays 
+    Xo=np.array(Xo)
+    Yo=np.array(Yo)
+    Do0=np.array(Do0)
+    Do1=np.array(Do1)
+    Do2=np.array(Do2)
+    Do3=np.array(Do3)
+    Do4=np.array(Do4)
+    Do5=np.array(Do5)
+    Do6=np.array(Do6) 
+
+    print("   ")
+    print("Mean square error for k = ",k) #ms error
+    Yhato0 = np.dot(Do0, w0)
+    sum_d0=0
+    for i in range(len(Yhato0)):
+        d1 = Yo[i] - Yhato0[i]
+        square_d1=d1**2
+        sum_d0=sum_d0+square_d1
+    MSE_d0=sum_d0/(len(Yhato0))
+    print("For Depth '0' MSE error = ",MSE_d0) #mean square error for D0
+
+    Yhato1 = np.dot(Do1, w1)
+    sum_d1=0
+    for i in range(len(Yhato1)):
+        d1 = Yo[i] - Yhato1[i]
+        square_d1=d1**2
+        sum_d1=sum_d1+square_d1
+    MSE_d1=sum_d1/(len(Yhato1))
+    print("For Depth '1' MSE error = ",MSE_d1) #mean square error for D1
+
+
+    Yhato2 = np.dot(Do2, w2)
+    sum_d2=0
+    for i in range(len(Yhato2)):
+        d1 = Yo[i] - Yhato2[i]
+        square_d1=d1**2
+        sum_d2=sum_d2+square_d1
+    MSE_d2=sum_d2/(len(Yhato2))
+    print("For Depth '2' MSE error = ",MSE_d2) #mean square error for D2
+
+    Yhato3 = np.dot(Do3, w3)
+    sum_d3=0
+    for i in range(len(Yhato3)):
+        d1 = Yo[i] - Yhato3[i]
+        square_d1=d1**2
+        sum_d3=sum_d3+square_d1
+    MSE_d3=sum_d3/(len(Yhato3))
+    print("For Depth '3' MSE error = ",MSE_d3) #mean square error for D3
+
+    Yhato4 = np.dot(Do4, w4)
+    sum_d4=0
+    for i in range(len(Yhato4)):
+        d1 = Yo[i] - Yhato4[i]
+        square_d1=d1**2
+        sum_d4=sum_d4+square_d1
+    MSE_d4=sum_d4/(len(Yhato4))
+    print("For Depth '4' MSE error = ",MSE_d4) #mean square error for D4
+
+
+    Yhato5 = np.dot(Do5, w5)
+    sum_d5=0
+    for i in range(len(Yhato5)):
+        d1 = Yo[i] - Yhato5[i]
+        square_d1=d1**2
+        sum_d5=5+square_d1
+    MSE_d5=sum_d5/(len(Yhato5))
+    print("For Depth '5' MSE error = ",MSE_d5) #mean square error for D5
+
+    Yhato6 = np.dot(Do6, w6)
+    sum_d6=0
+    for i in range(len(Yhato6)):
+        d1 = Yo[i] - Yhato6[i]
+        square_d1=d1**2
+        sum_d6=sum_d6+square_d1
+    MSE_d6=sum_d6/(len(Yhato6))
+    print("For Depth '6' MSE error = ",MSE_d6) #mean square error for D6
+
+    ## PLoting the graph
+    plt.title("k={k}".format(k=k))
+    plt.scatter(X,Yhat0,c='red',label="d=0",s=40)
+    plt.scatter(X,Yhat1,c='green',label='d=1',s=40)
+    plt.scatter(X,Yhat2,c='brown',label="d=2",s=40)
+    plt.scatter(X,Yhat3,c='orange',label='d=3',s=40)
+    plt.scatter(X,Yhat4,c='blue',label="d=4",s=40)
+    plt.scatter(X,Yhat5,c='yellow',label='d=5',s=40)
+    plt.scatter(X,Yhat6,c='black',label="d=6",s=40)
+    plt.legend(loc='best')
+    plt.grid() # making grid
+    plt.show() #displaying
+    //
+    
+    
+    
+    
+import numpy as np
+import matplotlib.pyplot as plt
+import re as re
+import os
+
+#Functions to check the weight of kernel
+def weight_kernel(value, x_val_mat, k):
+    m,n = np.shape(x_val_mat)
+    weights = np.mat(np.eye((m))) #get the weights
+    for j in range(m):
+        diff = value - X[j] #difference in the values
+        weights[j, j] = np.exp(diff * diff.T / (-2.0 * k**2)) #finding the weights
+    return weights
+
+#function to check the local weright train
+def localWeight_train(value, x_val_mat, y_val_mat, k):
+    wt = weight_kernel(value, x_val_mat, k)
+    W = (X.T * (wt*X)).I * (X.T * wt * y_val_mat.T) #calculating the weight
+    return W
+
+#function to check the weight regression train
+def localWeightRegression_train(x_val_mat, y_val_mat, k):
+    m,n = np.shape(x_val_mat)
+    ypred = np.zeros(m)
+    for i in range(m):
+        ypred[i] = x_val_mat[i] * localWeight_train(x_val_mat[i], x_val_mat, y_val_mat, k) #forumula to calculate
+    return ypred
+
+Data=[]
+
+#function to find the number from the text
+def find_number(text):
+    num = re.findall(r'[^(),'']+',text)
+    return num
+
+#reading the data from the input dataset file
+
+file_dir = os.path.dirname(os.path.realpath('__file__'))
+with open(os.path.join(file_dir, 'datasets/Q1_B_train.txt')) as f:
+    lines = f.readlines()
+    #reading the file line by line
+for line in lines:
+    nums=find_number(line)  
+    Data.append([float(nums[0]),float(nums[1])]) 
+arr2D=np.array(Data)
+
+#Sorting of Data
+sortedData = arr2D[arr2D[:,0].sort()]
+XX=np.array(sortedData[0,:][:,0])
+YY=np.array(sortedData[0,:][:,1]) 
+mXX = np.mat(XX) #mat functions
+mYY = np.mat(YY)
+m = np.shape(mYY)[1] #shaping
+one = np.ones((1, m), dtype = int)
+X = np.hstack((one.T, mXX.T))
+ypred = localWeightRegression_train(X, mYY, 0.204) #calling the functiuon
+xsort = X.copy()
+xsort.sort(axis=0)
+
+# PLOTS
+plt.scatter(XX, YY, color='blue')
+plt.plot(xsort[:, 1], ypred[X[:, 1].argsort(0)], color='red', linewidth=5)
+plt.xlabel('x axis')
+plt.ylabel('y axis')
+plt.title("Locally Weighted Linear Regression")
+plt.grid() #making grid 
+plt.show() #displaying the graph
+//
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import re as re
+import os
+
+#Functions to check the weight kernel
+def Weight_kernel(point, xmat, k):
+    m,n = np.shape(xmat)
+    weights = np.mat(np.eye((m)))
+    for j in range(m):
+        diff = point - X[j]
+        weights[j, j] = np.exp(diff * diff.T / (-2.0 * k**2)) #formula to find the weight
+    return weights
+#function to get the local weight
+def localWeight(point, xmat, ymat, k):
+    wt = Weight_kernel(point, xmat, k)
+    W = (X.T * (wt*X)).I * (X.T * wt * ymat.T) #formula to get the local weight
+    return W
+#function to get the local weight regression train
+def localWeightRegression_train(xmat, ymat, k):
+    m,n = np.shape(xmat)
+    ypred = np.zeros(m)
+    for i in range(m):
+        ypred[i] = xmat[i] * localWeight(xmat[i], xmat, ymat, k) #formula to get the weight
+    return ypred
+#function to get the local weight regression test
+def localWeightRegression_test(test,xmat, ymat, k):
+    m,n = np.shape(test)
+    ypred = np.zeros(m)
+    for i in range(m):
+        ypred[i] = xmat[i] * localWeight(test[i], xmat, ymat, k) # returning formula
+    return ypred
+
+#initialization 
+Data=[]
+TestData=[]
+
+#function to find the number from the text
+def find_number(text):
+    num = re.findall(r'[^(),'']+',text)
+    return num
+
+#Read train data set file
+file_dir = os.path.dirname(os.path.realpath('__file__'))
+#opening the file
+with open(os.path.join(file_dir, 'datasets/Q1_B_train.txt')) as f:
+    lines = f.readlines()
+for line in lines: #reading line by line
+    nums=find_number(line)  
+    Data.append([float(nums[0]),float(nums[1])]) 
+#converting to array and sorting
+arr2D=np.array(Data)
+sortedData = arr2D[arr2D[:,0].sort()]
+XX=np.array(sortedData[0,:][:,0])
+YY=np.array(sortedData[0,:][:,1]) 
+mXX = np.mat(XX)
+mYY = np.mat(YY) #mat function
+m = np.shape(mYY)[1]
+one = np.ones((1, m), dtype = int)
+X = np.hstack((one.T, mXX.T))
+ypred_train= localWeightRegression_train(X, mYY, 0.204) # calling function
+
+##Test
+#Read Test data set file
+with open(os.path.join(file_dir, 'datasets/Q1_C_test.txt')) as f:
+    linesTest = f.readlines()
+    #read line by lune
+for lineTest in linesTest:
+    nums=find_number(lineTest) 
+    TestData.append([float(nums[0]),float(nums[1])]) 
+arrTest2D=np.array(TestData)
+XTest1=np.array(arrTest2D[:,0])
+YTest1=np.array(arrTest2D[:,1]) 
+XTest = np.mat(XTest1) #mat function
+YTest = np.mat(YTest1)
+m = np.shape(YTest)[1]
+one = np.ones((1, m), dtype = int)
+XTest = np.hstack((one.T, XTest.T))
+p=0
+error=0
+Yresult=[]
+#for the test lines
+for Xo in XTest:
+    ypred1 =localWeightRegression_test(Xo,X, mYY, 0.204)  #calling functions
+    Yresult.append([Yresult])
+    d1 = (YTest1[p]-ypred1)
+    square_d1=d1**2
+    error=error+(square_d1)
+    p=p+1
+MSE=error/(int(p))
+print("Data Size = 128, MSE error = ",MSE[0]) #printing the MSE value
+
+//
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import re as re
+import os
+
+#Functions to check the weight kernel
+def Weight_kernel(point, xmat, k):
+    m,n = np.shape(xmat)
+    weights = np.mat(np.eye((m)))
+    for j in range(m):
+        diff = point - X[j]
+        weights[j, j] = np.exp(diff * diff.T / (-2.0 * k**2))
+    return weights
+#function to get the local weight
+def localWeight(point, xmat, ymat, k):
+    wt = Weight_kernel(point, xmat, k)
+    W = (X.T * (wt*X)).I * (X.T * wt * ymat.T)
+    return W
+
+#function to get the local weight regression train
+def localWeightRegression_train(xmat, ymat, k):
+    m,n = np.shape(xmat)
+    ypred = np.zeros(m)
+    for i in range(m):
+        ypred[i] = xmat[i] * localWeight(xmat[i], xmat, ymat, k)
+    return ypred
+#function to get the local weight regression test
+def localWeightRegression_test(test,xmat, ymat, k):
+    m,n = np.shape(test)
+    ypred = np.zeros(m)
+    for i in range(m):
+        ypred[i] = xmat[i] * localWeight(test[i], xmat, ymat, k)
+    return ypred
+
+Data=[]
+TestData=[]
+
+#function to find the number from the text
+def find_number(text):
+    num = re.findall(r'[^(),'']+',text)
+    return num
+
+#reading the data from the input dataset file
+
+file_dir = os.path.dirname(os.path.realpath('__file__'))
+with open(os.path.join(file_dir, 'datasets/Q1_B_train.txt')) as f: #reading line by line
+    lines = f.readlines()
+for line in lines:
+    nums=find_number(line)  
+    Data.append([float(nums[0]),float(nums[1])]) 
+arr2D=np.array(Data[0:20])
+
+#Sorting of Data
+sortedData = arr2D[arr2D[:,0].sort()]
+XX=np.array(sortedData[0,:][:,0])
+YY=np.array(sortedData[0,:][:,1]) 
+mXX = np.mat(XX)#mat function
+mYY = np.mat(YY)
+m = np.shape(mYY)[1]
+one = np.ones((1, m), dtype = int)
+X = np.hstack((one.T, mXX.T))
+ypred_train= localWeightRegression_train(X, mYY, 0.204) #calling function 
+
+#local weight regression Implement on Test Data 
+
+with open(os.path.join(file_dir, 'datasets/Q1_C_test.txt')) as f:
+    linesTest = f.readlines()
+for lineTest in linesTest: #reading line by line
+    nums=find_number(lineTest) 
+    TestData.append([float(nums[0]),float(nums[1])]) 
+arrTest2D=np.array(TestData)
+XTest1=np.array(arrTest2D[:,0])
+YTest1=np.array(arrTest2D[:,1]) 
+XTest = np.mat(XTest1)#mat function
+YTest = np.mat(YTest1)
+m = np.shape(YTest)[1]
+one = np.ones((1, m), dtype = int)
+XTest = np.hstack((one.T, XTest.T))
+p=0
+error=0
+Yresult=[]
+for Xo in XTest: #for every
+    ypred1 =localWeightRegression_test(Xo,X, mYY, 0.204) 
+    Yresult.append([Yresult])
+    d1 = (YTest1[p]-ypred1)
+    square_d1=d1**2
+    error=error+(square_d1)
+    p=p+1
+MSE=error/(int(p))
+print("Data Size = 20, MSE error = ",MSE[0]) #pring MSE 0
+    
+#Plot
+xsort = X.copy()
+xsort.sort(axis=0)
+plt.scatter(XX, YY, color='blue')
+plt.plot(xsort[:, 1], ypred_train[X[:, 1].argsort(0)], color='red', linewidth=5)
+plt.xlabel('x axis')
+plt.ylabel('y axis')
+plt.title("Locally Weighted Linear Regression") #title of the plot
+plt.grid() #making grid
+plt.show() #display
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import numpy as np # linear algebra
+import matplotlib.pyplot as plt
+import re as re
+import os
+
+Data=[]
+def find_number(text):
+    num = re.findall(r'[^(),'']+',text)
+    return num
+#opening the file
+file_dir = os.path.dirname(os.path.realpath('__file__'))
+with open(os.path.join(file_dir, 'datasets/Q3_data.txt')) as f:
+    lines = f.readlines() #reading every line
+    #print(lines)
+for line in lines:
+    nums=find_number(line)
+    if line.find('M') > 0 :
+        z=1 
+        #print("Found!")
+    else:
+        z=0
+        #print('not found')    
+        #appending the data
+    Data.append([float(nums[0]),float(nums[1]),float(nums[2]),float(z)]) 
+    #x,y = nums.split(',')
+arr2D=np.array(Data) 
+x2=arr2D[0:90,0:4]
+x_data=np.array(arr2D[:,0:3])
+#print(arr2D)
+
+#formula for calculating
+x = (x_data - np.min(x_data)) / (np.max(x_data) - np.min(x_data))
+
+x_train=x[0:90,0:3] #x train
+y_train=arr2D[0:90,3:] #y train
+#print(y_train)
+xx_test=x[90:,0:3]
+y_test=arr2D[90:,3:]
+
+x_train = x_train.T
+x_test = xx_test.T
+y_train = y_train.T
+y_test = y_test.T
+# Parameter initialize 
+
+def initialize_weights_and_bias(dimension):
+    
+    w = np.full((dimension,1),0.01)
+    b = 0.0
+    return w,b
+#and sigmoid function
+def sigmoid(z):
+    
+    y_head = 1 / (1+np.exp(-z))
+    
+    return y_head
+
+# Forward and Backward Propagation
+
+def forward_backward_propagation(w,b,x_train,y_head):
+    
+    z = np.dot(w.T,x_train) + b
+    y_head = sigmoid(z)
+    loss = -y_train*np.log(y_head) - (1-y_train)*np.log(1-y_head)
+    cost = (np.sum(loss)) / x_train.shape[1]
+    
+    #backward propogation
+    derivative_weight = (np.dot(x_train,((y_head-y_train).T)))/x_train.shape[1]
+    derivative_bias = np.sum(y_head-y_train)/x_train.shape[1]
+    gradients = {"derivative_weight": derivative_weight,"derivative_bias": derivative_bias}
+    return cost,gradients
+#update function
+def update(w, b, x_train, y_train, learning_rate,number_of_iterarion):
+    cost_list = []
+    cost_list2 = []
+    index = []
+    # updating(learning) parameters is number_of_iterarion times
+    for i in range(number_of_iterarion):
+        # make forward and backward propagation and find cost and gradients
+        cost,gradients = forward_backward_propagation(w,b,x_train,y_train)
+        cost_list.append(cost)
+        # lets update
+        w = w - learning_rate * gradients["derivative_weight"]
+        b = b - learning_rate * gradients["derivative_bias"]
+        if i % 10 == 0:
+            cost_list2.append(cost)
+            index.append(i)
+            #print(w,b)
+            #print ("Cost after iteration %i: %f" %(i/10, cost)) #if section defined to print our cost values in every 10 iteration. We do not need to do that. It's optional.
+            
+    # we update(learn) parameters weights and bias
+    parameters = {"weight": w,"bias": b}
+    # plt.plot(index,cost_list2)
+    # plt.xticks(index,rotation='vertical')
+    # plt.xlabel("Number of Iteration")
+    # plt.ylabel("Cost")
+    # #plt.show()
+    return parameters, gradients, cost_list
+#predict function
+def predict(w,b,x_test):
+    # x_test is a input for forward propagation
+    z = sigmoid(np.dot(w.T,x_test)+b)
+    Y_prediction = np.zeros((1,x_test.shape[1]))
+    for i in range(z.shape[1]):
+        if z[0,i]<= 0.5:
+            Y_prediction[0,i] = 0
+        else:
+            Y_prediction[0,i] = 1
+    return Y_prediction
+
+#logistic regression function
+def logistic_regression(x_train, y_train, x_test, y_test, learning_rate ,  num_iterations):
+    # initialize
+    dimension =  x_train.shape[0]  
+    w,b = initialize_weights_and_bias(dimension)
+    
+    parameters, gradients, cost_list = update(w, b, x_train, y_train, learning_rate,num_iterations)
+    
+    y_prediction_test = predict(parameters["weight"],parameters["bias"],x_test) #prediction test
+
+    # Print train/test Errors
+    
+    print("test accuracy: itr ", num_iterations," {} %".format(100 - np.mean(np.abs(y_prediction_test - y_test)) * 100))
+    return parameters #returning the parameters
+
+# for i in rane 10 to 201 in intervals of 10
+for i in range(10,201,10):
+    features_weight=logistic_regression(x_train, y_train, x_test, y_test,learning_rate = 0.01, num_iterations = i)
+
+#y prediction test
+y_prediction_test = predict(features_weight["weight"],features_weight["bias"],x_test)
+#weight
+W=features_weight["weight"]
+B=features_weight["bias"] #bias
+xx33=arr2D[:90,:3]
+yy11=arr2D[:90,3].astype('int')
+#print(xx_test,xx33)
+#print(y_prediction_test[0].astype('int'),yy11)
+x3=arr2D[90:,:3]
+y1=y_prediction_test[0].astype('int')
+#plotting
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(*x3[y1==0].T,  alpha=0.5,marker='o', s=8,color='red')
+ax.scatter(*x3[y1==1].T,  alpha=0.5,marker='^',s=8, color='blue')
+x = np.linspace(1.3, 1.9, 100)
+y = np.linspace(65, 100, 100)
+z = np.linspace(17, 30, 100)
+x, y = np.meshgrid(x, y)
+#eq = 0.12 * x + 0.01 * y + 1.09
+eq=W[0]*x+W[1]*15*y+W[2]*z+B
+ax.plot_surface(x, y, eq)
+ax.set_xlabel('Height') #x label
+ax.set_ylabel('Weight') #y label
+ax.set_zlabel('Age') #z label
+
+plt.show() #displaying the plot
+//
+
+
+
+
+
+
+def main():
+	print('PLEASE REF REPORT \n')
+	'''
+	Start writing your code here
+	'''
+
+
+if __name__ == "__main__":
+    main()
+    //
+    
+    
+    
+    import numpy as np # linear algebra
+import matplotlib.pyplot as plt
+import re as re
+import os
+
+Data=[]
+#finding the number from the test
+def find_number(text):
+    num = re.findall(r'[^(),'']+',text)
+    return num
+#file path
+file_dir = os.path.dirname(os.path.realpath('__file__'))
+with open(os.path.join(file_dir, 'datasets/Q3_data.txt')) as f:
+    lines = f.readlines() #readung the file
+    #print(lines)
+for line in lines: #reading every line
+    nums=find_number(line)
+    if line.find('M') > 0 :
+        z=1 
+        #print("Found!")
+    else:
+        z=0
+        #print('not found')    
+        #appending the float values
+    Data.append([float(nums[0]),float(nums[1]),float(nums[2]),float(z)]) 
+    #x,y = nums.split(',')
+arr2D=np.array(Data) 
+x2=arr2D[0:90,0:4]
+x_data=np.array(arr2D[:,0:2]) #formulating the array
+#print(arr2D)
+
+# x calculation  formula
+x = (x_data - np.min(x_data)) / (np.max(x_data) - np.min(x_data))
+
+x_train=x[0:90,0:2] # x train
+y_train=arr2D[0:90,3:] # y train
+#print(y_train)
+x_test=x[90:,0:2]
+y_test=arr2D[90:,3:]
+ #getting tge x train test and y train test
+x_train = x_train.T
+x_test = x_test.T
+y_train = y_train.T
+y_test = y_test.T
+# Parameter initialize
+
+def initialize_weights_and_bias(dimension):
+    
+    w = np.full((dimension,1),0.01)
+    b = 0.0
+    return w,b
+# and sigmoid function
+def sigmoid(z):
+    
+    y_head = 1 / (1+np.exp(-z))
+    
+    return y_head
+
+# Forward and Backward Propagation
+
+def forward_backward_propagation(w,b,x_train,y_head):
+    
+    z = np.dot(w.T,x_train) + b
+    y_head = sigmoid(z)
+    loss = -y_train*np.log(y_head) - (1-y_train)*np.log(1-y_head)
+    cost = (np.sum(loss)) / x_train.shape[1] #calculations
+    
+    #backward propogation
+    derivative_weight = (np.dot(x_train,((y_head-y_train).T)))/x_train.shape[1]
+    derivative_bias = np.sum(y_head-y_train)/x_train.shape[1]
+    gradients = {"derivative_weight": derivative_weight,"derivative_bias": derivative_bias}
+    return cost,gradients
+#update function
+def update(w, b, x_train, y_train, learning_rate,number_of_iterarion):
+    cost_list = []
+    cost_list2 = []
+    index = []
+    # updating(learning) parameters is number_of_iterarion times
+    for i in range(number_of_iterarion):
+        # make forward and backward propagation and find cost and gradients
+        cost,gradients = forward_backward_propagation(w,b,x_train,y_train)
+        cost_list.append(cost)
+        # lets update
+        w = w - learning_rate * gradients["derivative_weight"]
+        b = b - learning_rate * gradients["derivative_bias"]
+        if i % 10 == 0:
+            cost_list2.append(cost)
+            index.append(i)
+            #print(w,b)
+            #print ("Cost after iteration %i: %f" %(i/10, cost)) #if section defined to print our cost values in every 10 iteration. We do not need to do that. It's optional.
+            
+    # we update(learn) parameters weights and bias
+    parameters = {"weight": w,"bias": b}
+    # plt.plot(index,cost_list2)
+    # plt.xticks(index,rotation='vertical')
+    # plt.xlabel("Number of Iteration")
+    # plt.ylabel("Cost")
+    # #plt.show()
+    return parameters, gradients, cost_list
+#PREDICT function
+def predict(w,b,x_test):
+    # x_test is a input for forward propagation
+    z = sigmoid(np.dot(w.T,x_test)+b)
+    Y_prediction = np.zeros((1,x_test.shape[1]))
+    for i in range(z.shape[1]):
+        if z[0,i]<= 0.5:
+            Y_prediction[0,i] = 0
+        else:
+            Y_prediction[0,i] = 1
+    return Y_prediction
+
+#logistic regression function
+def logistic_regression(x_train, y_train, x_test, y_test, learning_rate ,  num_iterations):
+    # initialize
+    dimension =  x_train.shape[0]  
+    w,b = initialize_weights_and_bias(dimension)
+    
+    parameters, gradients, cost_list = update(w, b, x_train, y_train, learning_rate,num_iterations)
+    
+    y_prediction_test = predict(parameters["weight"],parameters["bias"],x_test)
+
+    # Print train/test Errors
+    
+    print("test accuracy: itr ", num_iterations," {} %".format(100 - np.mean(np.abs(y_prediction_test - y_test)) * 100))
+    return parameters
+#for i in 10 to 201 in the range of 10
+for i in range(10,201,10):
+    features_weight=logistic_regression(x_train, y_train, x_test, y_test,learning_rate = 0.01, num_iterations = i)
+# y prediction test
+y_prediction_test = predict(features_weight["weight"],features_weight["bias"],x_test)
+#weight
+W=features_weight["weight"]
+B=features_weight["bias"] # bias
+xx33=arr2D[:90,:2]
+yy11=arr2D[:90,3].astype('int')
+#print(xx_test,xx33)
+#print(y_prediction_test[0].astype('int'),yy11)
+x3=arr2D[90:,:2]
+# y prediction test
+y1=y_prediction_test[0].astype('int')
+print(x3,y1)
+#plot the graph
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(*x3[y1==0].T,  alpha=0.5,marker='o', s=8,color='red')
+ax.scatter(*x3[y1==1].T,  alpha=0.5,marker='^',s=8, color='blue')
+x6 = np.linspace(1.3, 1.9, 100)
+y = np.linspace(65, 100, 100)
+#z = np.linspace(-1, 1, 100)
+x6, y = np.meshgrid(x6, y)
+#eq = 0.12 * x6 + 0.01 * y + 1.09
+eq=W[0]*x6+W[1]*y-B
+ax.plot_surface(x6, y, eq)
+ax.set_xlabel('Height') #x label
+ax.set_ylabel('Weight') #y label
+ax.set_zlabel('Age') # z label
+
+plt.show() #display the graph
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
